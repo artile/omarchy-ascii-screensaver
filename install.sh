@@ -47,7 +47,7 @@ install_files() {
   mkdir -p "$DEST"
   cp -a "$SRC/bin" "$SRC/lib" "$SRC/vendor" "$SRC/scenes.txt" \
     "$SRC/README.md" "$SRC/LICENSE" "$SRC/NOTICE" "$SRC/third_party" \
-    "$SRC/manifest.json" "$SRC/Service.qml" "$SRC/IdleModel.js" \
+    "$SRC/manifest.json" "$SRC/AsciiScreensaverService.qml" "$SRC/IdleModel.js" \
     "$SRC/install.sh" "$SRC/uninstall.sh" "$DEST/"
   [[ -f $SRC/config.example ]] && cp -a "$SRC/config.example" "$DEST/"
   chmod +x "$DEST/bin/"* "$DEST/lib/play-scenes.mjs" "$DEST/install.sh" "$DEST/uninstall.sh"

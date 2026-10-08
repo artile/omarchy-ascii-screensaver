@@ -12,12 +12,14 @@ When your laptop sits untouched, Omarchy’s idle service (Quattro) or hypridle 
 
 ## Version
 
+**1.0.2** — Entry point renamed to `AsciiScreensaverService.qml`. After installing or upgrading on a running session, run `omarchy restart shell` once: the running Quickshell keeps compiled QML and directory listings cached, so an in-place upgrade otherwise loads stale code.
+
 **1.0.1** — Service.qml rebased on Omarchy **4.0.4-mac.1** stock idle (`IpcHandler`, not `ShellIpc`). Launcher wraps the installed `omarchy-launch-screensaver` so it matches that Omarchy build. Missing Node.js falls back to stock without breaking idle/lock.
 
 ## Credits
 
 - **Scenes & player:** [ascii.rest](https://ascii.rest) by [@bas3line](https://github.com/bas3line) — MIT. Vendored as `vendor/ascii.rest` (npm package [`ascii.rest`](https://www.npmjs.com/package/ascii.rest) 0.2.1). See `NOTICE` and `third_party/ASCII.REST-LICENSE.txt`.
-- **Idle / launch plumbing:** adapted from [Omarchy](https://github.com/omacom/omarchy) by David Heinemeier Hansson — MIT. See `Service.qml`, `IdleModel.js`, `bin/ascii-screensaver-launch`, and `third_party/OMARCHY-LICENSE.txt`.
+- **Idle / launch plumbing:** adapted from [Omarchy](https://github.com/omacom/omarchy) by David Heinemeier Hansson — MIT. See `AsciiScreensaverService.qml`, `IdleModel.js`, `bin/ascii-screensaver-launch`, and `third_party/OMARCHY-LICENSE.txt`.
 - **This package:** MIT — Taras Kornichuk (`LICENSE`).
 
 ## Install (Omarchy Quattro — recommended)

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.artile.ascii-screensaver",
   "name": "ASCII Screensaver",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Taras Kornichuk",
   "description": "Idle screensaver that plays the 15 full-colour ascii.rest scenes (by @bas3line). Clones omarchy.idle; falls back to the stock screensaver when Node.js is missing.",
   "kinds": [
@@ -10,7 +10,7 @@
   ],
   "keepLoaded": true,
   "entryPoints": {
-    "service": "Service.qml"
+    "service": "AsciiScreensaverService.qml"
   },
   "omarchy": {
     "clonedFrom": "omarchy.idle"

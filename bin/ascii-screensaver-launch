@@ -6,7 +6,7 @@
 # Hyprland dispatchers (4.0.4-mac.1 has no special workspaces; newer Quattro does).
 # Only the `-e omarchy-screensaver` payload is rewritten to this package's binary.
 #
-# Exit non-zero so Service.qml can fall back to stock omarchy-launch-screensaver
+# Exit non-zero so AsciiScreensaverService.qml can fall back to stock omarchy-launch-screensaver
 # (missing Node.js, missing stock launcher, patch failed, not in Hyprland).
 
 set -u

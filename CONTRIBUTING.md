@@ -10,7 +10,7 @@ omarchy plugin validate .   # on an Omarchy machine
 
 Keep `vendor/ascii.rest` in sync with npm when bumping scenes. Do not add symlinks inside the repo (`omarchy plugin validate` rejects them).
 
-When refreshing the idle clone, prefer the **device/release** `Service.qml` you target (e.g. 4.0.4-mac.1 uses `IpcHandler`; newer Quattro may use `ShellIpc`). Re-apply only: `asciiLauncher` property, `shellQuote`, and the `launchScreensaver` fallback. Keep imports/types/IPC identical to stock. Do not link the CLI from QML — use `bin/ascii-screensaver-link-cli`. Keep the file header credit.
+When refreshing the idle clone, prefer the **device/release** stock idle `Service.qml` you target (copied here as `AsciiScreensaverService.qml`) (e.g. 4.0.4-mac.1 uses `IpcHandler`; newer Quattro may use `ShellIpc`). Re-apply only: `asciiLauncher` property, `shellQuote`, and the `launchScreensaver` fallback. Keep imports/types/IPC identical to stock. Do not link the CLI from QML — use `bin/ascii-screensaver-link-cli`. Keep the file header credit.
 
 ## Publishing checklist
 
