@@ -2,10 +2,12 @@
   "schemaVersion": 1,
   "id": "io.github.artile.ascii-screensaver",
   "name": "ASCII Screensaver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Taras Kornichuk",
-  "description": "Idle screensaver that plays all 15 full-colour ascii.rest scenes (by @bas3line) instead of Omarchy's default TTE logo animation.",
-  "kinds": ["service"],
+  "description": "Idle screensaver that plays the 15 full-colour ascii.rest scenes (by @bas3line). Clones omarchy.idle; falls back to the stock screensaver when Node.js is missing.",
+  "kinds": [
+    "service"
+  ],
   "keepLoaded": true,
   "entryPoints": {
     "service": "Service.qml"

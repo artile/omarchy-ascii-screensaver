@@ -94,9 +94,43 @@ wait_for_terminal_resize() {
   done
 }
 
+# The stock Omarchy screensaver (anything named omarchy-screensaver on PATH that is not ours).
+stock_screensaver() {
+  # Stock player needs ttfx (4.x) or tte (3.x); without them it would exit immediately.
+  command -v ttfx >/dev/null 2>&1 || command -v tte >/dev/null 2>&1 || return 1
+  local dir candidate
+  local IFS=:
+  for dir in $PATH /usr/bin "${OMARCHY_PATH:-/usr/share/omarchy}/bin"; do
+    candidate="$dir/omarchy-screensaver"
+    [[ -x $candidate ]] || continue
+    [[ $(readlink -f "$candidate") == "$ROOT/bin/omarchy-screensaver" ]] && continue
+    printf '%s\n' "$candidate"
+    return 0
+  done
+  return 1
+}
+
+# Never leave the idle cycle without a screensaver window: if our player cannot
+# run (no node) or dies on its own, hand the terminal to the stock screensaver.
+# Closing the window early would make Omarchy's idle service cancel the pending lock.
+fallback_to_stock() {
+  local stock
+  if stock=$(stock_screensaver); then
+    [[ -n ${player_pid:-} ]] && kill "$player_pid" 2>/dev/null
+    trap - SIGINT SIGTERM SIGHUP SIGQUIT
+    exec "$stock"
+  fi
+  # No stock screensaver either: keep a black screen until a key or focus loss.
+  while true; do
+    if read -r -s -n1 -t 1 _ || { in_hyprland && ! screensaver_in_focus; }; then
+      exit_screensaver
+    fi
+  done
+}
+
 cmd_screensaver() {
-  need_node
   trap exit_screensaver SIGINT SIGTERM SIGHUP SIGQUIT
+  command -v node >/dev/null 2>&1 || fallback_to_stock
   printf '\033]11;rgb:00/00/00\007' # black background, as the stock screensaver does
   set_cursor_invisible true
   wait_for_terminal_resize
@@ -113,7 +147,9 @@ cmd_screensaver() {
       exit_screensaver
     fi
   done
-  exit_screensaver
+  # The player stopped by itself (crash, bad config): do not close the window.
+  set_cursor_invisible false
+  fallback_to_stock
 }
 
 cmd_launch() {

@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
-# Idempotent: symlink CLI into ~/.local/bin and seed config. Called by Service.qml on load.
+# Symlink ascii-screensaver into ~/.local/bin and seed the config file.
+# Run once after `omarchy plugin add` if you want the CLI on PATH.
+# install.sh already does this for the PATH-hook install path.
+
 set -euo pipefail
+
 ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
-mkdir -p "${XDG_BIN_HOME:-$HOME/.local/bin}"
-ln -sfn "$ROOT/bin/ascii-screensaver" "${XDG_BIN_HOME:-$HOME/.local/bin}/ascii-screensaver"
-CFG="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy-ascii-screensaver"
-mkdir -p "$CFG"
-if [[ ! -f $CFG/config && -f $ROOT/config.example ]]; then
-  cp -n "$ROOT/config.example" "$CFG/config" || true
+LOCAL_BIN="${XDG_BIN_HOME:-$HOME/.local/bin}"
+CFG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy-ascii-screensaver"
+
+mkdir -p "$LOCAL_BIN" "$CFG_DIR"
+ln -sfn "$ROOT/bin/ascii-screensaver" "$LOCAL_BIN/ascii-screensaver"
+if [[ ! -f $CFG_DIR/config && -f $ROOT/config.example ]]; then
+  cp -a "$ROOT/config.example" "$CFG_DIR/config"
 fi
+echo "Linked: $LOCAL_BIN/ascii-screensaver -> $ROOT/bin/ascii-screensaver"
+echo "Config: $CFG_DIR/config"

@@ -10,6 +10,10 @@ When your laptop sits untouched, Omarchy’s idle service (Quattro) or hypridle 
   <a href="https://ascii.rest/aurora-fjord/"><img src="https://ascii.rest/og/aurora-fjord.png" width="32%" alt="aurora-fjord"></a>
 </p>
 
+## Version
+
+**1.0.1** — Service.qml rebased on Omarchy **4.0.4-mac.1** stock idle (`IpcHandler`, not `ShellIpc`). Launcher wraps the installed `omarchy-launch-screensaver` so it matches that Omarchy build. Missing Node.js falls back to stock without breaking idle/lock.
+
 ## Credits
 
 - **Scenes & player:** [ascii.rest](https://ascii.rest) by [@bas3line](https://github.com/bas3line) — MIT. Vendored as `vendor/ascii.rest` (npm package [`ascii.rest`](https://www.npmjs.com/package/ascii.rest) 0.2.1). See `NOTICE` and `third_party/ASCII.REST-LICENSE.txt`.
@@ -20,18 +24,22 @@ When your laptop sits untouched, Omarchy’s idle service (Quattro) or hypridle 
 
 This repo is a real Omarchy **shell plugin**: it clones the built-in idle service (`omarchy.idle`) and redirects only the screensaver launch to the ascii.rest player. Timings in `~/.config/omarchy/shell.json` stay as they are.
 
-Requires [Node.js](https://nodejs.org/) (`sudo pacman -S --needed nodejs`).
+Requires [Node.js](https://nodejs.org/) for the ascii.rest scenes. Install it first if needed:
 
 ```bash
+sudo pacman -S --needed nodejs
 omarchy plugin add https://github.com/artile/omarchy-ascii-screensaver.git --enable
 ```
 
-Then open the screensaver once to try it:
+`omarchy plugin add` does not run install hooks, so optionally put the CLI on your PATH:
 
 ```bash
-ascii-screensaver --launch
-# or: System → Screensaver
+~/.config/omarchy/plugins/io.github.artile.ascii-screensaver/bin/ascii-screensaver-link-cli
 ```
+
+Then open the screensaver once to try it (`System → Screensaver`, or `ascii-screensaver --launch` after linking).
+
+If Node.js is missing, the idle plugin still loads and **falls back to the stock Omarchy screensaver** — idle timings and lock are unchanged. Re-add Node.js later and the ascii scenes come back automatically.
 
 Update later with `omarchy plugin update io.github.artile.ascii-screensaver`.
 
@@ -104,7 +112,7 @@ Exit the fullscreen screensaver with **any key**, or when the screensaver window
 
 | Omarchy | Idle trigger | What this package does |
 |--------|--------------|------------------------|
-| **4.x Quattro** | `omarchy.idle` service → `omarchy-launch-screensaver` | Plugin with `omarchy.clonedFrom: omarchy.idle` calls `bin/ascii-screensaver-launch` (absolute path) instead |
+| **4.x Quattro** | `omarchy.idle` service → `omarchy-launch-screensaver` | Plugin with `omarchy.clonedFrom: omarchy.idle` patches the *installed* launcher at runtime (absolute path to our `omarchy-screensaver`); non-zero exit falls back to stock |
 | **3.x** | `hypridle` → `omarchy-launch-screensaver` | `install.sh` prepends this package’s `bin/` on PATH so `omarchy-screensaver` is ours |
 
 Terminals: Alacritty, Foot, Ghostty, or Kitty (same constraint as stock Omarchy). Window class stays `org.omarchy.screensaver`.
@@ -112,7 +120,8 @@ Terminals: Alacritty, Foot, Ghostty, or Kitty (same constraint as stock Omarchy)
 ## Requirements
 
 - Omarchy on Arch (Hyprland)
-- Node.js ≥ 18 (`pacman -S --needed nodejs`) — install.sh can install it for you
+- Node.js ≥ 18 (`pacman -S --needed nodejs`) — required for ascii scenes; without it the plugin falls back to stock
+- install.sh can install Node.js for you (PATH-hook path)
 - No network at screensaver time (ascii.rest is vendored)
 
 ## Catalog notes (for maintainers)
@@ -139,8 +148,11 @@ Screensaver для Omarchy зі всіх 15 кольорових сцен [ascii
 
 **Встановлення (Omarchy 4):**
 ```bash
+sudo pacman -S --needed nodejs
 omarchy plugin add https://github.com/artile/omarchy-ascii-screensaver.git --enable
+~/.config/omarchy/plugins/io.github.artile.ascii-screensaver/bin/ascii-screensaver-link-cli   # опційно, CLI у PATH
 ```
+Без Node.js плагін все одно завантажується і показує стандартний screensaver Omarchy.
 
 **Або через скрипт (Omarchy 3 / без плагінів):**
 ```bash
