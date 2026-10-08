@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# ascii-screensaver — Omarchy screensaver built from the ascii.rest scenes.
+set -uo pipefail
+
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+ROOT="$(cd "$(dirname "$SELF")/.." && pwd)"
+PLAYER="$ROOT/lib/play-scenes.mjs"
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy-ascii-screensaver/config"
+
+# Defaults; the config file and environment can override them.
+ASCII_SCREENSAVER_SECONDS="${ASCII_SCREENSAVER_SECONDS:-}"
+ASCII_SCREENSAVER_ORDER="${ASCII_SCREENSAVER_ORDER:-}"
+ASCII_SCREENSAVER_ONLY="${ASCII_SCREENSAVER_ONLY:-}"
+ASCII_SCREENSAVER_LIGHT="${ASCII_SCREENSAVER_LIGHT:-}"
+env_seconds=$ASCII_SCREENSAVER_SECONDS env_order=$ASCII_SCREENSAVER_ORDER env_only=$ASCII_SCREENSAVER_ONLY
+env_light=$ASCII_SCREENSAVER_LIGHT
+# shellcheck source=/dev/null
+[[ -f "$CONFIG" ]] && . "$CONFIG"
+# Environment wins over the config file.
+SCENE_SECONDS="${env_seconds:-${ASCII_SCREENSAVER_SECONDS:-45}}"
+ORDER="${env_order:-${ASCII_SCREENSAVER_ORDER:-shuffle}}"
+ONLY="${env_only:-${ASCII_SCREENSAVER_ONLY:-}}"
+LIGHT="${env_light:-${ASCII_SCREENSAVER_LIGHT:-0}}"
+
+usage() {
+  cat <<USAGE
+ascii-screensaver: the ascii.rest scenes as an Omarchy screensaver
+
+  ascii-screensaver                  cycle all scenes in this terminal (any key exits)
+  ascii-screensaver --preview NAME   play one scene (any key exits)
+  ascii-screensaver --list           list the scenes
+  ascii-screensaver --launch         open the real fullscreen screensaver now, on every monitor
+  ascii-screensaver --screensaver    drop-in mode for omarchy-screensaver (run by Omarchy)
+
+Settings: $CONFIG
+  ASCII_SCREENSAVER_SECONDS=45        seconds per scene
+  ASCII_SCREENSAVER_ORDER=shuffle     shuffle | sequential | random
+  ASCII_SCREENSAVER_ONLY=""           e.g. "night-coast,tokyo-rain" (empty = all)
+  ASCII_SCREENSAVER_LIGHT=0           1 = light palette
+USAGE
+}
+
+need_node() {
+  command -v node >/dev/null 2>&1 && return 0
+  echo "ascii-screensaver: Node.js is required: sudo pacman -S --needed nodejs" >&2
+  exit 1
+}
+
+player_args() {
+  args=(--seconds "$SCENE_SECONDS")
+  [[ $LIGHT == 1 ]] && args+=(--light)
+  return 0
+}
+
+cycle_args() {
+  player_args
+  args=(--cycle "${args[@]}" --order "$ORDER")
+  [[ -n $ONLY ]] && args+=(--only "$ONLY")
+  return 0
+}
+
+in_hyprland() {
+  [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] && command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1
+}
+
+screensaver_in_focus() {
+  hyprctl activewindow -j 2>/dev/null | jq -e '.class == "org.omarchy.screensaver"' >/dev/null 2>&1
+}
+
+set_cursor_invisible() {
+  in_hyprland || return 0
+  # Omarchy 4 (Lua config) first, then the Omarchy 3 keyword form.
+  hyprctl eval "hl.config({ cursor = { invisible = $1 } })" &>/dev/null ||
+    hyprctl keyword cursor:invisible "$1" &>/dev/null || true
+}
+
+exit_screensaver() {
+  trap - SIGINT SIGTERM SIGHUP SIGQUIT
+  set_cursor_invisible false
+  if [[ -n ${player_pid:-} ]]; then
+    kill -TERM "$player_pid" 2>/dev/null
+    wait "$player_pid" 2>/dev/null
+  fi
+  # Same as the stock omarchy-screensaver: close the screensaver on every monitor.
+  pkill -f '[o]rg.omarchy.screensaver' 2>/dev/null
+  exit 0
+}
+
+# Terminals start at 80x24 and resize once the compositor sizes the window.
+wait_for_terminal_resize() {
+  local deadline=$((SECONDS + 2))
+  while ((SECONDS < deadline)) && [[ $(stty size 2>/dev/null) == "24 80" ]]; do
+    sleep 0.02
+  done
+}
+
+cmd_screensaver() {
+  need_node
+  trap exit_screensaver SIGINT SIGTERM SIGHUP SIGQUIT
+  printf '\033]11;rgb:00/00/00\007' # black background, as the stock screensaver does
+  set_cursor_invisible true
+  wait_for_terminal_resize
+
+  # Same pattern as the stock omarchy-screensaver: the animation runs in the
+  # background and this loop exits on any key or when the window loses focus.
+  # The player gets /dev/null as stdin so it never competes for the keyboard.
+  cycle_args
+  node "$PLAYER" "${args[@]}" </dev/null &
+  player_pid=$!
+
+  while kill -0 "$player_pid" 2>/dev/null; do
+    if read -r -s -n1 -t 1 _ || { in_hyprland && ! screensaver_in_focus; }; then
+      exit_screensaver
+    fi
+  done
+  exit_screensaver
+}
+
+cmd_launch() {
+  exec "$ROOT/bin/ascii-screensaver-launch" force
+}
+
+case "${1:-}" in
+-h | --help) usage ;;
+--list) need_node; exec node "$PLAYER" --list ;;
+--preview)
+  [[ -n ${2:-} ]] || { echo "Name a scene; see ascii-screensaver --list" >&2; exit 1; }
+  need_node
+  player_args
+  exec node "$PLAYER" --preview "$2" "${args[@]}"
+  ;;
+--screensaver) cmd_screensaver ;;
+--launch) cmd_launch ;;
+"") need_node; cycle_args; exec node "$PLAYER" "${args[@]}" ;;
+*) echo "Unknown argument: $1" >&2; usage >&2; exit 1 ;;
+esac

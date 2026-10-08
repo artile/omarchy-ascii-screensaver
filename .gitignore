@@ -1,0 +1,5 @@
+*.tgz
+*.tar.gz
+.DS_Store
+test-home/
+*.log

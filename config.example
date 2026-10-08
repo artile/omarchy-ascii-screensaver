@@ -1,0 +1,10 @@
+# ~/.config/omarchy-ascii-screensaver/config
+# Seconds each scene plays before switching
+ASCII_SCREENSAVER_SECONDS=45
+# Order: shuffle | sequential | random
+ASCII_SCREENSAVER_ORDER=shuffle
+# Empty = all 15 scenes. Or a comma list:
+# ASCII_SCREENSAVER_ONLY="night-coast,tokyo-rain,aurora-fjord"
+ASCII_SCREENSAVER_ONLY=""
+# 1 = ascii.rest light palette
+ASCII_SCREENSAVER_LIGHT=0

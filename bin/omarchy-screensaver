@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Drop-in for Omarchy's omarchy-screensaver: omarchy-launch-screensaver runs
+# "omarchy-screensaver" by name inside the screensaver terminal, and this copy
+# comes first in PATH (see install.sh). Removing it restores the stock one.
+exec "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/ascii-screensaver" --screensaver "$@"

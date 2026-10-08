@@ -1,0 +1,21 @@
+ASCII Screensaver for Omarchy
+=============================
+
+This repository is MIT-licensed (see LICENSE).
+
+Third-party components
+----------------------
+
+1. ascii.rest (vendored under vendor/ascii.rest/)
+   License: MIT
+   Copyright (c) 2026 bas3line (https://github.com/bas3line)
+   Homepage: https://ascii.rest
+   npm: https://www.npmjs.com/package/ascii.rest
+   See vendor/ascii.rest/LICENSE.
+
+2. Omarchy idle service (Service.qml, IdleModel.js) and
+   launch-screensaver logic (bin/ascii-screensaver-launch)
+   Adapted from https://github.com/omacom/omarchy
+   License: MIT
+   Copyright (c) David Heinemeier Hansson
+   See the comment headers in those files.

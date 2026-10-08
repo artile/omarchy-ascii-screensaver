@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Idempotent: symlink CLI into ~/.local/bin and seed config. Called by Service.qml on load.
+set -euo pipefail
+ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+mkdir -p "${XDG_BIN_HOME:-$HOME/.local/bin}"
+ln -sfn "$ROOT/bin/ascii-screensaver" "${XDG_BIN_HOME:-$HOME/.local/bin}/ascii-screensaver"
+CFG="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy-ascii-screensaver"
+mkdir -p "$CFG"
+if [[ ! -f $CFG/config && -f $ROOT/config.example ]]; then
+  cp -n "$ROOT/config.example" "$CFG/config" || true
+fi
