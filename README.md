@@ -1,4 +1,4 @@
-# ASCII Screensaver for Omarchy
+# ascii.rest Screensaver for Omarchy
 
 Idle screensaver for [Omarchy](https://omarchy.org) that plays **all 15 full-colour scenes** from [ascii.rest](https://ascii.rest) instead of the stock TTE logo animation.
 
