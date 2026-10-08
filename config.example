@@ -8,3 +8,6 @@ ASCII_SCREENSAVER_ORDER=shuffle
 ASCII_SCREENSAVER_ONLY=""
 # 1 = ascii.rest light palette
 ASCII_SCREENSAVER_LIGHT=0
+# Screensaver terminal font size. "auto" sizes it so the 200-column scenes fill
+# the screen at full detail; a number (e.g. 9.5) forces it. Stock Omarchy uses 18.
+ASCII_SCREENSAVER_FONT_SIZE=auto

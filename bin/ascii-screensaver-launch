@@ -40,18 +40,46 @@ PATCHED="$RUNTIME_DIR/ascii-screensaver-launch-$$.sh"
 cleanup() { rm -f "$PATCHED"; }
 trap cleanup EXIT
 
+# Font size for the screensaver terminal. ascii.rest scenes are 200x100 "pixels"
+# (200 columns, 50 rows of half-blocks) and are only ever scaled down, never up,
+# so the sharpest picture is a terminal about 200 columns wide. Stock Omarchy uses
+# size 18, which on a HiDPI laptop gives ~110 columns and big blocky pixels.
+# "auto" (default) picks a size per monitor from its logical width.
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy-ascii-screensaver/config"
+env_font=${ASCII_SCREENSAVER_FONT_SIZE:-}
+# shellcheck source=/dev/null
+[[ -f $CONFIG ]] && . "$CONFIG"
+export ASCII_SCREENSAVER_FONT_SIZE="${env_font:-${ASCII_SCREENSAVER_FONT_SIZE:-auto}}"
+
+HEADER='ascii_font_size() {
+  local fs=${ASCII_SCREENSAVER_FONT_SIZE:-auto}
+  if [[ $fs != auto && $fs =~ ^[0-9]+([.][0-9]+)?$ ]]; then echo "$fs"; return; fi
+  fs=$(hyprctl monitors -j 2>/dev/null | jq -r --arg m "$1" '"'"'.[] | select(.name == $m) | (.width / .scale) as $w | ([([($w / 168 * 10 | floor) / 10, 6] | max), 18] | min)'"'"' 2>/dev/null)
+  [[ -n $fs ]] && echo "$fs" || echo 10
+}
+'
+
 # Quote the absolute saver path for embedding in the patched script.
 printf -v SAVER_Q '%q' "$SAVER"
 
 # 1) Point every `-e omarchy-screensaver` at our drop-in.
 # 2) Neutralize the stock ttfx/tte presence checks (we do not need them).
 # 3) Leave everything else (terminals, workspaces, hypr_exec) untouched.
-sed \
-  -e "s|-e omarchy-screensaver|-e ${SAVER_Q}|g" \
-  -e 's/omarchy-cmd-missing ttfx/false/g' \
-  -e 's/omarchy-cmd-missing tte/false/g' \
-  -e 's/command -v tte/true/g' \
-  "$STOCK" >"$PATCHED" || exit 1
+# 4) Per monitor, swap the stock font size for ascii_font_size (see above).
+{
+  printf '%s\n' '#!/bin/bash' "$HEADER"
+  sed \
+    -e "s|-e omarchy-screensaver|-e ${SAVER_Q}|g" \
+    -e 's/omarchy-cmd-missing ttfx/false/g' \
+    -e 's/omarchy-cmd-missing tte/false/g' \
+    -e 's/command -v tte/true/g' \
+    -e 's/^\([[:space:]]*\)hypr_focus_monitor "\$m"$/&\n\1ASCII_FS=$(ascii_font_size "$m")/' \
+    -e 's|--config="\$OMARCHY_PATH/default/foot/screensaver.ini"|& --font="JetBrainsMono Nerd Font:size=$ASCII_FS"|' \
+    -e 's|--config-file "\$OMARCHY_PATH/default/alacritty/screensaver.toml"|& -o "font.size=$ASCII_FS"|' \
+    -e 's|--font-size=18|--font-size="$ASCII_FS"|' \
+    -e 's|font_size=18|font_size="$ASCII_FS"|' \
+    "$STOCK" | sed '1{/^#!/d}'
+} >"$PATCHED" || exit 1
 chmod +x "$PATCHED"
 
 # Fail closed if the payload rewrite did not land (stock script changed shape).

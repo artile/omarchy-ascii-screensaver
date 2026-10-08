@@ -37,6 +37,7 @@ Settings: $CONFIG
   ASCII_SCREENSAVER_ORDER=shuffle     shuffle | sequential | random
   ASCII_SCREENSAVER_ONLY=""           e.g. "night-coast,tokyo-rain" (empty = all)
   ASCII_SCREENSAVER_LIGHT=0           1 = light palette
+  ASCII_SCREENSAVER_FONT_SIZE=auto    terminal font size; auto = sharpest
 USAGE
 }
 

@@ -12,6 +12,8 @@ When your laptop sits untouched, Omarchy’s idle service (Quattro) or hypridle 
 
 ## Version
 
+**1.0.3** — Sharper scenes: the screensaver terminal font is sized per monitor so the 200-column ascii.rest scenes show at full detail instead of Omarchy's size-18 blocks. Override with `ASCII_SCREENSAVER_FONT_SIZE`.
+
 **1.0.2** — Entry point renamed to `AsciiScreensaverService.qml`. After installing or upgrading on a running session, run `omarchy restart shell` once: the running Quickshell keeps compiled QML and directory listings cached, so an in-place upgrade otherwise loads stale code.
 
 **1.0.1** — Service.qml rebased on Omarchy **4.0.4-mac.1** stock idle (`IpcHandler`, not `ShellIpc`). Launcher wraps the installed `omarchy-launch-screensaver` so it matches that Omarchy build. Missing Node.js falls back to stock without breaking idle/lock.
